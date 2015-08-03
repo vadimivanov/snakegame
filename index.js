@@ -62,8 +62,9 @@ var snake = {
     move: function (x, y) {
         // todo remove fucking unshift
 //        console.log('before',this.snakeMap);
-        this.snakeMap = new  Array({x: x, y: y});
+        this.snakeMap.push({x: x, y: y});
         this.lastPosition = this.snakeMap[0];
+
 //        console.log('after',this.snakeMap, this.lastPosition);
     },
 
@@ -121,7 +122,6 @@ function main() {
 function update() {
     animationFrame++;
 
-    // todo map this shit
     var keyCodeArr = [game.data.keyUp,game.data.keyDown,game.data.keyLeft,game.data.keyRight];
     var keyStamp = [game.data.up,game.data.down,game.data.left,game.data.right];
 
@@ -131,43 +131,16 @@ function update() {
         }
     }
 
-//    if (keystate[game.data.keyUp] && snake.direction != game.data.down) {
-//        snake.direction = game.data.up;
-//    }
-//    if (keystate[game.data.keyDown] && snake.direction != game.data.up) {
-//        snake.direction = game.data.down;
-//    }
-//    if (keystate[game.data.keyLeft] && snake.direction != game.data.left) {
-//        snake.direction = game.data.left;
-//    }
-//    if (keystate[game.data.keyRight] && snake.direction != game.data.right) {
-//        snake.direction = game.data.right;
-//    }
+    if (animationFrame%10 == 0) {
 
-    if (animationFrame%5 == 0) {
         var moveX = snake.lastPosition.x,
             moveY = snake.lastPosition.y;
-//        var moveObj = {
-//            0: moveY -= 1,
-//            1: moveY += 1,
-//            2: moveX -= 1,
-//            3: moveX += 1
-//        };
-//        moveObj[snake.direction];
-        switch (snake.direction) {
-            case game.data.up:
-                moveY -= 1;
-                break;
-            case game.data.down:
-                moveY += 1;
-                break;
-            case game.data.left:
-                moveX -= 1;
-                break;
-            case game.data.right:
-                moveX += 1;
-                break;
-        }
+
+        if(snake.direction === 0) moveY--;
+        if(snake.direction === 1) moveY++;
+        if(snake.direction === 2) moveX--;
+        if(snake.direction === 3) moveX++;
+
         if (0 > moveY || moveY > field.height - 1 ||
             0 > moveX || moveX > field.width - 1 ||
             field.get(moveX, moveY) == game.data.snake) {
@@ -182,7 +155,7 @@ function update() {
             var cell = snake.remove();
             field.set(game.data.empty, cell.x, cell.y);
         }
-//        console.log(moveX, moveY);
+
         field.set(game.data.snake, moveX, moveY);
         snake.move(moveX, moveY);
     }
@@ -191,20 +164,11 @@ function update() {
 function paint() {
     var cellW = canvas.width/game.data.width;
     var cellH = canvas.height/game.data.height;
+    var colorList = ["#ffffff", "#008000", "#ff0000"];
+
     for (var x = 0; x < game.data.width; x++) {
         for (var y = 0; y < game.data.height; y++) {
-            //todo map
-            switch (field.get(x, y)) {
-                case game.data.empty:
-                    ctx.fillStyle = "#ffffff";
-                    break;
-                case game.data.snake:
-                    ctx.fillStyle = "#008000";
-                    break;
-                case game.data.food:
-                    ctx.fillStyle = "#ff0000";
-                    break;
-            }
+            ctx.fillStyle = colorList[field.get(x, y)];
             ctx.fillRect(x*cellW, y*cellH, cellW, cellH);
         }
     }
