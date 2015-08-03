@@ -1,6 +1,7 @@
 var game = {},
     canvas,
     ctx,
+    score = 0,
     animationFrame,
     keystate;
 
@@ -21,6 +22,7 @@ game.data = {
     right: 3
 
 };
+// todo use constructors, Luke
 var field = {
     width: null,
     height: null,
@@ -58,8 +60,11 @@ var snake = {
     },
 
     move: function (x, y) {
-        this.snakeMap.unshift({x: x, y: y});
+        // todo remove fucking unshift
+//        console.log('before',this.snakeMap);
+        this.snakeMap = new  Array({x: x, y: y});
         this.lastPosition = this.snakeMap[0];
+//        console.log('after',this.snakeMap, this.lastPosition);
     },
 
     remove: function () {
@@ -67,13 +72,13 @@ var snake = {
     }
 };
 function makeFood() {
-    var check = 0;
-    while (check < game.data.count) {
+    var amountFood = 0;
+    while (amountFood < game.data.count) {
         var foodPositionX = Math.floor(field.width * Math.random()),
             foodPositionY = Math.floor(field.height * Math.random());
         if (field.get(foodPositionX, foodPositionY) == game.data.empty) {
             field.set(game.data.food, foodPositionX, foodPositionY);
-            check++;
+            amountFood++;
         }
     }
 }
@@ -116,22 +121,39 @@ function main() {
 function update() {
     animationFrame++;
 
-    if (keystate[game.data.keyUp] && snake.direction != game.data.down) {
-        snake.direction = game.data.up;
+    // todo map this shit
+    var keyCodeArr = [game.data.keyUp,game.data.keyDown,game.data.keyLeft,game.data.keyRight];
+    var keyStamp = [game.data.up,game.data.down,game.data.left,game.data.right];
+
+    for (var i = 0; i < keyCodeArr.length; i++) {
+        if (keystate[keyCodeArr[i]] && snake.direction != keyStamp[i]) {
+            snake.direction = keyStamp[i];
+        }
     }
-    if (keystate[game.data.keyDown] && snake.direction != game.data.up) {
-        snake.direction = game.data.down;
-    }
-    if (keystate[game.data.keyLeft] && snake.direction != game.data.left) {
-        snake.direction = game.data.left;
-    }
-    if (keystate[game.data.keyRight] && snake.direction != game.data.right) {
-        snake.direction = game.data.right;
-    }
+
+//    if (keystate[game.data.keyUp] && snake.direction != game.data.down) {
+//        snake.direction = game.data.up;
+//    }
+//    if (keystate[game.data.keyDown] && snake.direction != game.data.up) {
+//        snake.direction = game.data.down;
+//    }
+//    if (keystate[game.data.keyLeft] && snake.direction != game.data.left) {
+//        snake.direction = game.data.left;
+//    }
+//    if (keystate[game.data.keyRight] && snake.direction != game.data.right) {
+//        snake.direction = game.data.right;
+//    }
 
     if (animationFrame%5 == 0) {
         var moveX = snake.lastPosition.x,
             moveY = snake.lastPosition.y;
+//        var moveObj = {
+//            0: moveY -= 1,
+//            1: moveY += 1,
+//            2: moveX -= 1,
+//            3: moveX += 1
+//        };
+//        moveObj[snake.direction];
         switch (snake.direction) {
             case game.data.up:
                 moveY -= 1;
@@ -149,15 +171,18 @@ function update() {
         if (0 > moveY || moveY > field.height - 1 ||
             0 > moveX || moveX > field.width - 1 ||
             field.get(moveX, moveY) == game.data.snake) {
+            score = 0;
            return initGame();
         }
 
         if (field.get(moveX, moveY) == game.data.food) {
+            score++;
             makeFood();
         } else {
             var cell = snake.remove();
             field.set(game.data.empty, cell.x, cell.y);
         }
+//        console.log(moveX, moveY);
         field.set(game.data.snake, moveX, moveY);
         snake.move(moveX, moveY);
     }
@@ -168,6 +193,7 @@ function paint() {
     var cellH = canvas.height/game.data.height;
     for (var x = 0; x < game.data.width; x++) {
         for (var y = 0; y < game.data.height; y++) {
+            //todo map
             switch (field.get(x, y)) {
                 case game.data.empty:
                     ctx.fillStyle = "#ffffff";
@@ -182,6 +208,9 @@ function paint() {
             ctx.fillRect(x*cellW, y*cellH, cellW, cellH);
         }
     }
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "#000000";
+    ctx.fillText("Score: " + score, 10, 20);
 }
 
 start();
