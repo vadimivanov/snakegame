@@ -30,9 +30,9 @@ Field.prototype = {
 
 var Snake = function () {
     this.snakeMap = null;
+    this.snakeNewSkin = null;
     this.direction = null;
     this.lastPosition = null;
-    this.oldPosition = null;
 };
 
 Snake.prototype = {
@@ -44,15 +44,13 @@ Snake.prototype = {
         this.move(x, y);
     },
     move: function (x, y) {
-        this.snakeMap.unshift({x: x, y: y});
-//        this.snakeMap.push({x: x, y: y});
-//        for (var i = this.snakeMap.length - 1; i < 0; i--) {
-//            console.log(this.snakeMap[i-1]);
-//            this.oldPosition = this.snakeMap[i];
-//            this.snakeMap.push(this.oldPosition);
-//
-//        }
-        this.lastPosition = this.snakeMap[0];
+        this.snakeMap.push({x: x, y: y});
+        this.snakeNewSkin = new Array({x: x, y: y});
+        for (var i = 0; i < this.snakeMap.length - 1; i++) {
+            this.snakeNewSkin.push(this.snakeMap[i]);
+        }
+        this.snakeMap = this.snakeNewSkin;
+        this.lastPosition = {x: x, y: y};
     },
     remove: function () {
         return this.snakeMap.pop();
@@ -90,6 +88,12 @@ var Game = function () {
 Game.prototype = {
     constructor: Game,
     field: this.field,
+    directions: [
+        {x : 0, y : -1},
+        {x : 0, y : +1},
+        {x : -1, y : 0},
+        {x : +1, y : 0}
+    ],
 
     start: function () {
         var container = document.getElementById("wrapper");
@@ -136,30 +140,30 @@ Game.prototype = {
 
         if (game.animationRate%game.speed == 0) {
 
-            var directions = [
-                    {x : 0, y : -1},
-                    {x : 0, y : +1},
-                    {x : -1, y : 0},
-                    {x : +1, y : 0}
-                ],
-            move = {
+            var move = {
                 x : this.snake.lastPosition.x,
                 y : this.snake.lastPosition.y
             };
-            move.x += directions[this.snake.direction].x;
-            move.y += directions[this.snake.direction].y;
+            move.x += this.directions[this.snake.direction].x;
+            move.y += this.directions[this.snake.direction].y;
 
-            if (move.y < 0 || move.y > this.field.height - 1 ||
-                move.x < 0 || move.x > this.field.width - 1 ||
+            var fieldBorder = [
+                move.y < 0,
+                move.y > this.field.height - 1,
+                move.x < 0,
+                move.x > this.field.width - 1
+            ];
+
+            if (fieldBorder[this.snake.direction] ||
                 this.field.get(move.x, move.y) == game.data.snake) {
                 game.score = 0;
-                game.speed = 10;
+                game.speed = 12;
                 return game.initGame();
             }
 
             if (this.field.get(move.x, move.y) == game.data.food) {
                 game.score++;
-                game.speed -= 0.5;
+                game.speed -= 1;
                 makeFood(this.field);
             } else {
                 var cell = this.snake.remove();
