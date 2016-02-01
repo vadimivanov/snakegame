@@ -79,7 +79,7 @@ var Game = function () {
     this.score = 0;
     this.animationRate = 0;
     this.keystate = {};
-    this.speed = 12;
+    this.speed = 50;
 
     this.field = new Field();
     this.snake = new Snake();
@@ -188,6 +188,9 @@ Game.prototype = {
         game.ctx.font = "20px Arial";
         game.ctx.fillStyle = "#000000";
         game.ctx.fillText("Score: " + game.score, 10, 20);
+//        setTimeout(function(){
+//            game.paint()
+//        }, 1000 / game.speed);
     }
 };
 
